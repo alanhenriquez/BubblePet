@@ -107,6 +107,7 @@
     <!--EditProfile-->
     <drawable name="bgBotonGuardarPasswordEditProfile">@drawable/bg_boton_especial3</drawable>
     <drawable name="bgBotonGuardarDatosEditProfile">@drawable/bg_boton_especial1</drawable>
+    <drawable name="bgBotonCerrarSesionEditProfile">@drawable/bg_boton_especial2</drawable>
     <integer name="textAlignmentEditProfile">@integer/alignmentStart</integer>
     <integer name="textAlignmentBotonEditProfile">@integer/alignmentCenter</integer>
     <integer name="linesBiografiaEditProfile">20</integer>
@@ -133,6 +134,7 @@
     <string name="textPasswordEditProfile">Contraseña de tu cuenta</string>
     <string name="hintPasswordEditProfile">Contraseña</string>
     <string name="textoBotonEditProfile">Guardar</string>
+    <string name="textoBotonCerrarSesionEditProfile">Cerrar Sesion</string>
 
 
     <!--SignUp-->

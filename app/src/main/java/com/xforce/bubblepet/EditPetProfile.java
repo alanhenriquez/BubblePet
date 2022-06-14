@@ -96,7 +96,6 @@ public class EditPetProfile extends AppCompatActivity {
 
 
 
-
         /*Botones y acciones*/
         getData();/*Carga previa de los datos*/
         saveDatosButton.setOnClickListener(v ->{
@@ -125,6 +124,7 @@ public class EditPetProfile extends AppCompatActivity {
 
         });/*Elegimos la nueva imagen de usuario*/
 
+
     }
 
     @Override public void onBackPressed() {
@@ -136,8 +136,6 @@ public class EditPetProfile extends AppCompatActivity {
     }
     /*-------------------------------------------------------------------------------*/
 
-
-    /*-------------------------------------------------------------------------------*/
 
 
     /*--------------------*/
@@ -193,6 +191,8 @@ public class EditPetProfile extends AppCompatActivity {
     }
     /*Termina codigo de la seleccion de imagen y envio a la base de datos*/
     /*--------------------*/
+
+
 
 
 

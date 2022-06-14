@@ -42,6 +42,7 @@ public class EditProfile extends AppCompatActivity {
     private EditText userPassword;
     private String userString = " ";
     private String userNameString = " ";
+    TextView signOut;
     View showPassword;
 
     //ImageView para la imagen de usuario
@@ -87,7 +88,7 @@ public class EditProfile extends AppCompatActivity {
         userPassword = findViewById(R.id.userPasswordEditProfile);
         TextView saveDatosButton = findViewById(R.id.botonGuardarDatosEditProfile);
         TextView eraseCountButton = findViewById(R.id.botonGuardarPasswordEditProfile);
-
+        signOut = findViewById(R.id.botonCerrarSesionEditProfile);
         showPassword = findViewById(R.id.showPassword);
 
         changeImageUser = findViewById(R.id.selectImageEditProfile);
@@ -127,6 +128,10 @@ public class EditProfile extends AppCompatActivity {
 
 
         });/*Elegimos la nueva imagen de usuario*/
+        signOut.setOnClickListener(view -> {
+            FirebaseAuth.getInstance().signOut();
+            CerrarSesion();
+        });/*Registrarse si no tienes cuenta*/
     }
 
     @Override public void onBackPressed() {
@@ -187,6 +192,19 @@ public class EditProfile extends AppCompatActivity {
     }
     /*Termina codigo de la seleccion de imagen y envio a la base de datos*/
     /*--------------------*/
+
+
+
+
+
+    /*Cerramos la sesion y volvemos al login*/
+    private void CerrarSesion (){
+        Intent loged = new Intent(getApplicationContext(), Login.class);
+        loged.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(loged);
+        finish();
+    }
+
 
 
     /*Convertimos a string el contenido de los campos de texto*/
