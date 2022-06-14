@@ -2,11 +2,8 @@ package com.xforce.bubblepet;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -14,37 +11,37 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Login extends AppCompatActivity {
-
+public class SignUp extends AppCompatActivity {
 
     /*-------------------------------------------------------------------------------*/
     /*Variables para texto, campos de texto y contenedores*/
-    private String email;
-    private String password;
-    EditText etLoginPassword;
-    EditText etLoginMail;
-    TextView signUp;
-    TextView signUpTx;
-    TextView logoIka;
+    private EditText userEmail;
+    private EditText userPassword;
+    private String userEmailString = " ";
+    private String userPasswordString = " ";
 
-    /*Acceso a Firebase y AwesomeValidation*/
+    /*Acceso a Firebase*/
     FirebaseAuth userAuth;
-    FirebaseUser user;
     DatabaseReference userDataBase;
 
 
+
+
+
+    /*-------------------------------------------------------------------------------*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_sign_up);
 
 
 
@@ -54,111 +51,108 @@ public class Login extends AppCompatActivity {
          * Estos accesos los encontraras en el build.gradle tanto de proyecto como app*/
         userAuth = FirebaseAuth.getInstance();
         userDataBase = FirebaseDatabase.getInstance().getReference();
-        user = userAuth.getCurrentUser();
-        if (user != null){
-            loginExitoso();
-        }/*Conficional en caso de que el usuario este logeado*/
 
 
 
 
 
-        /*Simples variables definidas accediendo a los id*/
-        etLoginPassword = findViewById(R.id.txtPasswordLog);
-        etLoginMail = findViewById(R.id.txtEmailLog);
-        View btShowPass = findViewById(R.id.showPassword);
-        View btResetText = findViewById(R.id.resetText);
-        View btLogIn = findViewById(R.id.btnLoginUser);
-        signUp = findViewById(R.id.btnSingupLogin);
-        signUpTx = findViewById(R.id.txtSingupLogin);
+        /*Simples variables antes definidas accediendo a los id*/
+        userEmail = findViewById(R.id.userMailSignUp);
+        userPassword = findViewById(R.id.userPasswordSignUp);
+        View btResetTextMail = findViewById(R.id.resetText1);
+        View btResetTextPassword = findViewById(R.id.resetText2);
+        TextView btSignUp = findViewById(R.id.btSignUp);
 
 
 
 
 
         /*Botones y acciones*/
-        btLogIn.setOnClickListener(v -> {
-            if (ValidarEmail(etLoginMail)){
-                email = etLoginMail.getText().toString();
-                password = etLoginPassword.getText().toString();
+        btSignUp.setOnClickListener(view -> {
+            if (ValidarEmail(userEmail)){
+                userEmailString = userEmail.getText().toString();
+                userPasswordString = userPassword.getText().toString();
 
-                if(!email.isEmpty() && !password.isEmpty()){
-                    login();
+                if(!userEmailString.isEmpty() && !userPasswordString.isEmpty()){
+                    registerUser();
                 }else{
-                    if (!email.isEmpty()){
-                        msgToast("Ingrese la contraseña");
-                    }else {
-                        msgToast("Rellene los campos");
+                    if (userEmailString.isEmpty()){
+                        msgToast("Ingrese su correo electronico");
+                        userEmail.requestFocus();
+                    }else{
+                        msgToast("Ingrese una contraseña");
+                        userPassword.requestFocus();
                     }
                 }
             }
-        });/*Logearse si tiene cuenta*/
-        signUp.setOnClickListener(view -> {
-            Intent ir = new Intent(getApplicationContext(), SignUp.class);
-            startActivity(ir);
-            finish();
-        });/*Registrarse si no tienes cuenta*/
-        ShowPassword(btShowPass, etLoginPassword);/*Mostrar contraseña*/
-        ResetText(btResetText, etLoginMail);/*Reiniciar texto*/
-
-
+        });/*Creamos el registro del usuario y logueamos*/
+        ResetText(btResetTextMail,userEmail);/*Reiniciamos el texto del campo Mail*/
+        ResetText(btResetTextPassword,userPassword);/*Reiniciamos el texto del campo Password*/
 
     }
 
-
-
-
-
-
-
-
-
-    /*Logeamos al usuario*/
-    private void login (){
-        userAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                loginExitoso();
-            }else{
-                String errorCode = ((FirebaseAuthException) Objects.requireNonNull(task.getException())).getErrorCode();
-                dameToastdeerror(errorCode, etLoginMail, etLoginPassword);
-            }
-        });
-    }
-
-    /*Login exitoso del usuario*/
-    private void loginExitoso (){
-        Intent loged = new Intent(getApplicationContext(), MainActivity.class);
-        loged.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(loged);
+    @Override public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), Login.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
         finish();
     }
+    /*-------------------------------------------------------------------------------*/
 
-    /*Mostramos la contraseña del campo de texto*/
-    @SuppressLint("ClickableViewAccessibility")
-    private void ShowPassword (View elemTouch, EditText passwordToShow){
-        elemTouch.setOnTouchListener((v, event) -> {
 
-            switch ( event.getAction() ) {
-                case MotionEvent.ACTION_DOWN:
-                    passwordToShow.setInputType(InputType.TYPE_CLASS_TEXT);
-                    break;
-                case MotionEvent.ACTION_UP:
-                    passwordToShow.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    break;
+
+
+
+
+
+    /*Creamos al usuario y lo registramos*/
+    private void registerUser(){
+        //Autenticaremos al usuario mediante su correo y contraseña
+        userAuth.createUserWithEmailAndPassword(userEmailString, userPasswordString).addOnCompleteListener(task -> {
+            if (task.isSuccessful()){
+                SetDataBase();
+            }else{
+                String errorCode = ((FirebaseAuthException) Objects.requireNonNull(task.getException())).getErrorCode();
+                dameToastdeerror(errorCode, userEmail, userPassword);
             }
-            return true;
         });
     }
+
+
+
+    /*Agregamos la informacion a la base de datos*/
+    private void SetDataBase(){
+        Map<String, Object> data = new HashMap<>();
+        data.put("userMail", userEmailString);
+        data.put("userPassword", userPasswordString);
+
+        String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
+        userDataBase.child("Users").child(id).child("CountData").setValue(data).addOnCompleteListener(task1 -> {
+
+            Intent intent = new Intent(getApplicationContext(), SignUpFinish.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+
+        });
+    }
+
+
 
     /*Reiniciamos el texto del campo de texto*/
     private void ResetText (View elemTouch, EditText textToReset){
         elemTouch.setOnClickListener(view -> textToReset.setText(""));
     }
 
+
+
     /*Variable para generar el mensaje Toast*/
     private void msgToast(String message) {
         Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG).show();
     }
+
+
 
     /*Variable para generar el mensaje Toast del tipo de error*/
     private void dameToastdeerror(String error, EditText mail, EditText password) {
@@ -188,7 +182,6 @@ public class Login extends AppCompatActivity {
                 /*msgToast("La contraseña no es válida o el usuario no tiene contraseña.");*/
                 /*password.setError("la contraseña es incorrecta ");*/
                 password.requestFocus();
-                password.setText("");
                 break;
 
             case "ERROR_USER_MISMATCH":
@@ -242,6 +235,8 @@ public class Login extends AppCompatActivity {
 
     }
 
+
+
     /*Validar Email*/
     private boolean ValidarEmail(EditText args) {
         // Patrón para validar el email
@@ -268,6 +263,9 @@ public class Login extends AppCompatActivity {
 
 
     }
+
+
+
 
 
 }
