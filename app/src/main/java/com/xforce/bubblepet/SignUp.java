@@ -13,6 +13,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.xforce.bubblepet.helpers.ChangeActivity;
+import com.xforce.bubblepet.helpers.EmailValidation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,20 +45,8 @@ public class SignUp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-
-
-
-
-        /* Acceso a Instancias FireBase
-         * Estos accesos los encontraras en el build.gradle tanto de proyecto como app*/
         userAuth = FirebaseAuth.getInstance();
         userDataBase = FirebaseDatabase.getInstance().getReference();
-
-
-
-
-
-        /*Simples variables antes definidas accediendo a los id*/
         userEmail = findViewById(R.id.userMailSignUp);
         userPassword = findViewById(R.id.userPasswordSignUp);
         View btResetTextMail = findViewById(R.id.resetText1);
@@ -64,27 +54,9 @@ public class SignUp extends AppCompatActivity {
         TextView btSignUp = findViewById(R.id.btSignUp);
 
 
-
-
-
-        /*Botones y acciones*/
         btSignUp.setOnClickListener(view -> {
-            if (ValidarEmail(userEmail)){
-                userEmailString = userEmail.getText().toString();
-                userPasswordString = userPassword.getText().toString();
-
-                if(!userEmailString.isEmpty() && !userPasswordString.isEmpty()){
-                    registerUser();
-                }else{
-                    if (userEmailString.isEmpty()){
-                        msgToast("Ingrese su correo electronico");
-                        userEmail.requestFocus();
-                    }else{
-                        msgToast("Ingrese una contraseña");
-                        userPassword.requestFocus();
-                    }
-                }
-            }
+            Register();
+            ChangeActivity.build(getApplicationContext(),SignUpFinish.class).start();
         });/*Creamos el registro del usuario y logueamos*/
         ResetText(btResetTextMail,userEmail);/*Reiniciamos el texto del campo Mail*/
         ResetText(btResetTextPassword,userPassword);/*Reiniciamos el texto del campo Password*/
@@ -93,68 +65,56 @@ public class SignUp extends AppCompatActivity {
 
     @Override public void onBackPressed() {
         super.onBackPressed();
-        Intent intent = new Intent(getApplicationContext(), Login.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
+        ChangeActivity.build(getApplicationContext(),Login.class).start();
     }
     /*-------------------------------------------------------------------------------*/
 
 
+    private void Register(){
+        if (EmailValidation.validate(userEmail)){
+            userEmailString = userEmail.getText().toString();
+            userPasswordString = userPassword.getText().toString();
 
+            if(!userEmailString.isEmpty() && !userPasswordString.isEmpty()){
+                //Autenticaremos al usuario mediante su correo y contraseña
+                userAuth.createUserWithEmailAndPassword(userEmailString, userPasswordString).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("userMail", userEmailString);
+                        data.put("userPassword", userPasswordString);
+                        data.put("userID", id);
 
-
-
-
-    /*Creamos al usuario y lo registramos*/
-    private void registerUser(){
-        //Autenticaremos al usuario mediante su correo y contraseña
-        userAuth.createUserWithEmailAndPassword(userEmailString, userPasswordString).addOnCompleteListener(task -> {
-            if (task.isSuccessful()){
-                SetDataBase();
+                        userDataBase.child("Users").child(id).child("CountData").setValue(data).addOnCompleteListener(task1 -> {
+                            msgToast("Usuario creado con exito");
+                        });
+                    }else{
+                        String errorCode = ((FirebaseAuthException) Objects.requireNonNull(task.getException())).getErrorCode();
+                        dameToastdeerror(errorCode, userEmail, userPassword);
+                    }
+                });
             }else{
-                String errorCode = ((FirebaseAuthException) Objects.requireNonNull(task.getException())).getErrorCode();
-                dameToastdeerror(errorCode, userEmail, userPassword);
+                if (userEmailString.isEmpty()){
+                    msgToast("Ingrese su correo electrónico");
+                    userEmail.requestFocus();
+                }else{
+                    msgToast("Ingrese una contraseña");
+                    userPassword.requestFocus();
+                }
             }
-        });
+        }else {
+            msgToast("Ingrese un correo electrónico valido");
+        }
     }
 
-
-
-    /*Agregamos la informacion a la base de datos*/
-    private void SetDataBase(){
-        Map<String, Object> data = new HashMap<>();
-        data.put("userMail", userEmailString);
-        data.put("userPassword", userPasswordString);
-
-        String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
-        userDataBase.child("Users").child(id).child("CountData").setValue(data).addOnCompleteListener(task1 -> {
-
-            Intent intent = new Intent(getApplicationContext(), SignUpFinish.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
-
-        });
-    }
-
-
-
-    /*Reiniciamos el texto del campo de texto*/
     private void ResetText (View elemTouch, EditText textToReset){
         elemTouch.setOnClickListener(view -> textToReset.setText(""));
     }
 
-
-
-    /*Variable para generar el mensaje Toast*/
     private void msgToast(String message) {
         Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG).show();
     }
 
-
-
-    /*Variable para generar el mensaje Toast del tipo de error*/
     private void dameToastdeerror(String error, EditText mail, EditText password) {
 
         switch (error) {
@@ -235,34 +195,6 @@ public class SignUp extends AppCompatActivity {
 
     }
 
-
-
-    /*Validar Email*/
-    private boolean ValidarEmail(EditText args) {
-        // Patrón para validar el email
-        Pattern pattern = Pattern.compile("^[_A-Za-z0-9-+]+(\\.[_A-Za-z0-9-]+)*@"
-                + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
-
-        // El email a validar
-        String email = args.getText().toString();
-        Matcher mather = pattern.matcher(email);
-
-        if (email.isEmpty()){
-            args.requestFocus();
-            msgToast("Ingrese un correo electronico");
-            return false;
-        }else {
-            if (mather.find()) {
-                /*El email ingresado es válido.*/
-                return true;
-            } else {
-                msgToast("Su email ingresado es inválido.");
-                return false;
-            }
-        }
-
-
-    }
 
 
 

@@ -26,7 +26,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout2"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/sizeFooter"
+        android:layout_height="50dp"
         android:background="@color/colorFooterMain"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -151,7 +151,7 @@
                         android:id="@+id/footerUserIcon"
                         android:layout_width="@dimen/sizeIconFooter"
                         android:layout_height="@dimen/sizeIconFooter"
-                        android:background="@drawable/iconUser"
+                        android:background="@drawable/icon_pet"
                         android:orientation="vertical"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"

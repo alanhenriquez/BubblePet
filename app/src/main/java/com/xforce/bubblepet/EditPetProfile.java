@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.xforce.bubblepet.helpers.ChangeActivity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,10 +84,10 @@ public class EditPetProfile extends AppCompatActivity {
 
         /*Simples variables antes definidas accediendo a los id*/
         petName = findViewById(R.id.petName);
-        petAge = findViewById(R.id.petEdadSignUpFinish2);
-        petColor = findViewById(R.id.petColorSignUpFinish2);
-        petBreed = findViewById(R.id.petRazaSignUpFinish2);
-        petHealth = findViewById(R.id.petEstadoSignUpFinish2);
+        petAge = findViewById(R.id.petEdad);
+        petColor = findViewById(R.id.petColor);
+        petBreed = findViewById(R.id.petRaza);
+        petHealth = findViewById(R.id.petEstado);
         View btResetTextName = findViewById(R.id.resetText1);
         View btResetTextEge = findViewById(R.id.resetText2);
         View btResetTextColor = findViewById(R.id.resetText3);
@@ -106,11 +110,30 @@ public class EditPetProfile extends AppCompatActivity {
             petBreedString = petBreed.getText().toString();
             petHealthString = petHealth.getText().toString();
 
-            SetDataBase();
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
+            Map<String, Object> data = new HashMap<>();
+            if (petNameString != null){
+                data.put("petName", petNameString);
+            }
+            if (petEgeString != null){
+                data.put("petEge", petEgeString);
+            }
+            if (petColorString != null){
+                data.put("petColor", petColorString);
+            }
+            if (petBreedString != null){
+                data.put("petBreed", petBreedString);
+            }
+            if (petHealthString != null){
+                data.put("petHealth", petHealthString);
+            }
+
+            String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
+            userDataBase.child("Users").child(id).child("PetData").setValue(data).addOnCompleteListener(task1 -> {
+
+                msgToast("Datos actualizados");
+
+            });
+            ChangeActivity.build(getApplicationContext(),MainActivity.class).start();
 
         });/*Actualizamos los datos del perfil*/
         ResetText(btResetTextName,petName);/*Reiniciamos el texto*/
@@ -120,7 +143,60 @@ public class EditPetProfile extends AppCompatActivity {
         ResetText(btResetTextHealth,petHealth);/*Reiniciamos el texto*/
         changeImageUser.setOnClickListener(v ->{
 
-            openGallery();
+            String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
+            userDataBase.child("Users").child(id).addValueEventListener(new ValueEventListener() {
+                @SuppressLint("SetTextI18n")
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String val;
+
+                        if (snapshot.hasChild("PetData")){
+
+                            /*-----------------*/
+                            if (snapshot.child("PetData").hasChild("imgPetPerfil")){
+                                msgToast("Insertado");
+                                Intent i = new Intent();
+                                i.setType("image/*");
+                                i.setAction(Intent.ACTION_GET_CONTENT);
+                                // pass the constant to compare it with the returned requestCode
+                                startActivityForResult(Intent.createChooser(i, "Select Picture"), SELECT_PICTURE);
+                            }
+                            else {
+                                msgToast("Agregado");
+                                Map<String, Object> data = new HashMap<>();
+                                data.put("ImageMain", " ");
+                                String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
+                                userDataBase.child("Users").child(id).child("PetData").child("imgPetPerfil").setValue(data).addOnCompleteListener(task1 -> msgToast("Datos actualizados"));
+                                CerrarSesion();
+                            }
+                        }
+                        else {
+                            if (
+                                    petName.getText().toString().isEmpty() &&
+                                    petAge.getText().toString().isEmpty() &&
+                                    petColor.getText().toString().isEmpty() &&
+                                    petBreed.getText().toString().isEmpty() &&
+                                    petHealth.getText().toString().isEmpty()
+                            ){
+                                msgToast("Primero rellene los demas campos");
+                                petName.requestFocus();
+                            }else {
+                                msgToast("Primero guarde los datos");
+                            }
+                        }
+
+                    }else {
+                        msgToast("Error");
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    msgToast("Error de carga");
+                }
+            });
 
         });/*Elegimos la nueva imagen de usuario*/
 
@@ -137,65 +213,70 @@ public class EditPetProfile extends AppCompatActivity {
     /*-------------------------------------------------------------------------------*/
 
 
-
-    /*--------------------*/
-    /*Codigo de la seleccion de imagen y envio a la base de datos*/
-    private void openGallery(){
-        Intent i = new Intent();
-        i.setType("image/*");
-        i.setAction(Intent.ACTION_GET_CONTENT);
-        // pass the constant to compare it with the returned requestCode
-        startActivityForResult(Intent.createChooser(i, "Select Picture"), SELECT_PICTURE);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK && requestCode == SELECT_PICTURE) {
+
+
             imageUri = data.getData();
             contImageUser.setImageURI(imageUri);
+
+            // Code for showing progressDialog while uploading
+            ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Subiendo...");
+            progressDialog.show();
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setOnCancelListener(new Dialog.OnCancelListener() {
+                @Override public void onCancel(DialogInterface dialog) {
+                    // DO SOME STUFF HERE
+                }
+            });
 
             String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
             StorageReference folder = FirebaseStorage.getInstance().getReference().child("Users").child(id);
             final StorageReference file_name = folder.child(imageUri.getLastPathSegment());
-            file_name.putFile(imageUri).addOnSuccessListener(taskSnapshot ->
-                    file_name.getDownloadUrl().addOnSuccessListener(uri -> {
-
-                        //Enviamos a la base de datos la url de la imagen
-                        setDataImageBase(String.valueOf(uri));
-                        msgToast("Se subio correctamente");
-
-
-
-                    }));
+            file_name.putFile(imageUri).addOnProgressListener(taskSnapshot -> {
+                double progress = (100.0 * taskSnapshot.getBytesTransferred()
+                        / taskSnapshot.getTotalByteCount());
+                progressDialog.setMessage("Exportando al " + (int)progress + "%");
+            }).addOnSuccessListener(taskSnapshot -> file_name.getDownloadUrl().addOnSuccessListener(uri -> {
+                //Enviamos a la base de datos la url de la imagen
+                setDataImageBase(String.valueOf(uri));
+                progressDialog.dismiss();
+                msgToast("Se subio correctamente");
+            })).addOnFailureListener(e -> {
+                // Error, Image not uploaded
+                progressDialog.dismiss();
+                msgToast("Error en la carga " + e.getMessage());
+            });
 
 
         }
     }
+
+
 
     /*Agregamos la Url de la imagen a la base de datos*/
     private void setDataImageBase(String link){
         Map<String, Object> data = new HashMap<>();
         data.put("ImageMain", link);
         String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
-        userDataBase.child("Users").child(id).child("ImageData").child("imgPetPerfil").setValue(data).addOnCompleteListener(task1 -> msgToast("Datos actualizados"));
-
-    }
-
-    private void setDefaultDataImageBase(){
-        Map<String, Object> data = new HashMap<>();
-        data.put("ImageMain", " ");
-        String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
-        userDataBase.child("Users").child(id).child("ImageData").child("imgPerfil").setValue(data).addOnCompleteListener(task1 -> msgToast("Datos actualizados"));
-
+        userDataBase.child("Users").child(id).child("PetData").child("imgPetPerfil").setValue(data).addOnCompleteListener(task1 -> msgToast("Datos actualizados"));
+        CerrarSesion();
     }
     /*Termina codigo de la seleccion de imagen y envio a la base de datos*/
     /*--------------------*/
 
 
-
-
-
+    /*Cerramos la sesion y volvemos al login*/
+    private void CerrarSesion (){
+        Intent loged = new Intent(getApplicationContext(), Login.class);
+        loged.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(loged);
+        finish();
+    }
 
     /*Funcion getData que obtiene los datos desde Firebase base de datos*/
     private void getData (){
@@ -207,40 +288,53 @@ public class EditPetProfile extends AppCompatActivity {
                 if (snapshot.exists()) {
                     String val;
 
-                    /*-----------------*/
-                    val = Objects.requireNonNull(snapshot.child("PetData").child("petName").getValue()).toString();
-                    petName = findViewById(R.id.petName);
-                    petName.setText(val);
+                    if (snapshot.hasChild("PetData")){
+                        /*-----------------*/
+                        if (snapshot.child("PetData").hasChild("petName")) {
+                            val = Objects.requireNonNull(snapshot.child("PetData").child("petName").getValue()).toString();
+                            petName = findViewById(R.id.petName);
+                            petName.setText(val);
+                        }
 
 
-                    /*-----------------*/
-                    val = Objects.requireNonNull(snapshot.child("PetData").child("petEge").getValue()).toString();
-                    petAge = findViewById(R.id.petEdad);
-                    petAge.setText(val);
+                        /*-----------------*/
+                        if (snapshot.child("PetData").hasChild("petEge")) {
+                            val = Objects.requireNonNull(snapshot.child("PetData").child("petEge").getValue()).toString();
+                            petAge = findViewById(R.id.petEdad);
+                            petAge.setText(val);
+                        }
 
-                    /*-----------------*/
-                    val = Objects.requireNonNull(snapshot.child("PetData").child("petColor").getValue()).toString();
-                    petColor = findViewById(R.id.petColor);
-                    petColor.setText(val);
+                        /*-----------------*/
+                        if (snapshot.child("PetData").hasChild("petColor")) {
+                            val = Objects.requireNonNull(snapshot.child("PetData").child("petColor").getValue()).toString();
+                            petColor = findViewById(R.id.petColor);
+                            petColor.setText(val);
+                        }
 
-                    /*-----------------*/
-                    val = Objects.requireNonNull(snapshot.child("PetData").child("petBreed").getValue()).toString();
-                    petBreed = findViewById(R.id.petRaza);
-                    petBreed.setText(val);
+                        /*-----------------*/
+                        if (snapshot.child("PetData").hasChild("petBreed")) {
+                            val = Objects.requireNonNull(snapshot.child("PetData").child("petBreed").getValue()).toString();
+                            petBreed = findViewById(R.id.petRaza);
+                            petBreed.setText(val);
+                        }
 
-                    /*-----------------*/
-                    val = Objects.requireNonNull(snapshot.child("PetData").child("petHealth").getValue()).toString();
-                    petHealth = findViewById(R.id.petEstado);
-                    petHealth.setText(val);
+                        /*-----------------*/
+                        if (snapshot.child("PetData").hasChild("petHealth")) {
+                            val = Objects.requireNonNull(snapshot.child("PetData").child("petHealth").getValue()).toString();
+                            petHealth = findViewById(R.id.petEstado);
+                            petHealth.setText(val);
+                        }
 
-
-                    /*-----------------*/
-                    val = Objects.requireNonNull(snapshot.child("ImageData").child("imgPetPerfil").child("ImageMain").getValue()).toString();
-                    contImageUser = findViewById(R.id.imgPhotoPet);
-                    Glide.with(getApplicationContext()).load(val).into(contImageUser);
-
-
-
+                        /*-----------------*/
+                        if (snapshot.child("PetData").hasChild("imgPetPerfil")){
+                            val = Objects.requireNonNull(snapshot.child("PetData").child("imgPetPerfil").child("ImageMain").getValue()).toString();
+                            contImageUser = findViewById(R.id.imgPhotoPet);
+                            Glide.with(getApplicationContext()).load(val).into(contImageUser);
+                        }
+                    }
+                    else {
+                        msgToast("Crear perfil de mascota");
+                    }
 
                 }else {
                     msgToast("Error");
@@ -255,37 +349,10 @@ public class EditPetProfile extends AppCompatActivity {
         });
     }
 
-
-
-    /*Agregamos la informacion a la base de datos*/
-    private void SetDataBase(){
-        Map<String, Object> data = new HashMap<>();
-        data.put("petName", petNameString);
-        data.put("petEge", petEgeString);
-        data.put("petColor", petColorString);
-        data.put("petBreed", petBreedString);
-        data.put("petHealth", petHealthString);
-
-        String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
-        userDataBase.child("Users").child(id).child("PetData").setValue(data).addOnCompleteListener(task1 -> {
-
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
-            msgToast("Registro Exitoso");
-
-        });
-    }
-
-
-
     /*Reiniciamos el texto del campo de texto*/
     private void ResetText (View elemTouch, EditText textToReset){
         elemTouch.setOnClickListener(view -> textToReset.setText(""));
     }
-
-
 
     /*Variable para generar el mensaje Toast*/
     private void msgToast(String message) {

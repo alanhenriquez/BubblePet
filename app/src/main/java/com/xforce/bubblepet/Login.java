@@ -17,14 +17,13 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.xforce.bubblepet.helpers.ChangeActivity;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Login extends AppCompatActivity {
-
-
     /*-------------------------------------------------------------------------------*/
     /*Variables para texto, campos de texto y contenedores*/
     private String email;
@@ -32,8 +31,6 @@ public class Login extends AppCompatActivity {
     EditText etLoginPassword;
     EditText etLoginMail;
     TextView signUp;
-    TextView signUpTx;
-    TextView logoIka;
 
     /*Acceso a Firebase y AwesomeValidation*/
     FirebaseAuth userAuth;
@@ -46,37 +43,23 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-
-
-
-
-        /* Acceso a Instancias FireBase
-         * Estos accesos los encontraras en el build.gradle tanto de proyecto como app*/
         userAuth = FirebaseAuth.getInstance();
         userDataBase = FirebaseDatabase.getInstance().getReference();
         user = userAuth.getCurrentUser();
-        if (user != null){
-            loginExitoso();
-        }/*Conficional en caso de que el usuario este logeado*/
-
-
-
-
-
-        /*Simples variables definidas accediendo a los id*/
         etLoginPassword = findViewById(R.id.txtPasswordLog);
         etLoginMail = findViewById(R.id.txtEmailLog);
+        signUp = findViewById(R.id.btnSingupLogin);
+
         View btShowPass = findViewById(R.id.showPassword);
         View btResetText = findViewById(R.id.resetText);
         View btLogIn = findViewById(R.id.btnLoginUser);
-        signUp = findViewById(R.id.btnSingupLogin);
-        signUpTx = findViewById(R.id.txtSingupLogin);
 
+        if (user != null){
+            ChangeActivity.build(getApplicationContext(),MainActivity.class).start();
+        }
 
-
-
-
-        /*Botones y acciones*/
+        ShowPassword(btShowPass, etLoginPassword);
+        ResetText(btResetText, etLoginMail);
         btLogIn.setOnClickListener(v -> {
             if (ValidarEmail(etLoginMail)){
                 email = etLoginMail.getText().toString();
@@ -84,7 +67,8 @@ public class Login extends AppCompatActivity {
 
                 if(!email.isEmpty() && !password.isEmpty()){
                     login();
-                }else{
+                }
+                else{
                     if (!email.isEmpty()){
                         msgToast("Ingrese la contraseña");
                     }else {
@@ -92,32 +76,19 @@ public class Login extends AppCompatActivity {
                     }
                 }
             }
-        });/*Logearse si tiene cuenta*/
+        });
         signUp.setOnClickListener(view -> {
-            Intent ir = new Intent(getApplicationContext(), SignUp.class);
-            startActivity(ir);
-            finish();
-        });/*Registrarse si no tienes cuenta*/
-        ShowPassword(btShowPass, etLoginPassword);/*Mostrar contraseña*/
-        ResetText(btResetText, etLoginMail);/*Reiniciar texto*/
-
-
+            ChangeActivity.build(getApplicationContext(),SignUp.class).start();
+        });
 
     }
 
 
 
-
-
-
-
-
-
-    /*Logeamos al usuario*/
     private void login (){
         userAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()){
-                loginExitoso();
+                ChangeActivity.build(getApplicationContext(),MainActivity.class).start();
             }else{
                 String errorCode = ((FirebaseAuthException) Objects.requireNonNull(task.getException())).getErrorCode();
                 dameToastdeerror(errorCode, etLoginMail, etLoginPassword);
@@ -125,15 +96,6 @@ public class Login extends AppCompatActivity {
         });
     }
 
-    /*Login exitoso del usuario*/
-    private void loginExitoso (){
-        Intent loged = new Intent(getApplicationContext(), MainActivity.class);
-        loged.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(loged);
-        finish();
-    }
-
-    /*Mostramos la contraseña del campo de texto*/
     @SuppressLint("ClickableViewAccessibility")
     private void ShowPassword (View elemTouch, EditText passwordToShow){
         elemTouch.setOnTouchListener((v, event) -> {
@@ -150,17 +112,14 @@ public class Login extends AppCompatActivity {
         });
     }
 
-    /*Reiniciamos el texto del campo de texto*/
     private void ResetText (View elemTouch, EditText textToReset){
         elemTouch.setOnClickListener(view -> textToReset.setText(""));
     }
 
-    /*Variable para generar el mensaje Toast*/
     private void msgToast(String message) {
         Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG).show();
     }
 
-    /*Variable para generar el mensaje Toast del tipo de error*/
     private void dameToastdeerror(String error, EditText mail, EditText password) {
 
         switch (error) {
@@ -242,7 +201,6 @@ public class Login extends AppCompatActivity {
 
     }
 
-    /*Validar Email*/
     private boolean ValidarEmail(EditText args) {
         // Patrón para validar el email
         Pattern pattern = Pattern.compile("^[_A-Za-z0-9-+]+(\\.[_A-Za-z0-9-]+)*@"
