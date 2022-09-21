@@ -110,6 +110,8 @@ public class FragmentUserHome extends Fragment {
         View view = inflater.inflate(R.layout.fragment_user_home, container, false);
 
 
+
+
         getData(view);
         return view;
     }
@@ -129,72 +131,58 @@ public class FragmentUserHome extends Fragment {
                 if (snapshot.exists()) {
                     String val;
 
-                    if (snapshot.hasChild("PerfilData")) {
-                        val = Objects.requireNonNull(snapshot.child("PerfilData").child("user").getValue()).toString();
-                        user = v.findViewById(R.id.userName);
-                        user.setText(val);
-                    }
+                    val = Objects.requireNonNull(snapshot.child("PerfilData").child("user").getValue()).toString();
+                    user = v.findViewById(R.id.userName);
+                    user.setText(val);
 
                     /*-----------------*/
-                    if (snapshot.hasChild("CountData")) {
-                        val = Objects.requireNonNull(snapshot.child("CountData").child("userMail").getValue()).toString();
-                        userMail = v.findViewById(R.id.userMail);
-                        userMail.setText(val);
-                    }
+                    val = Objects.requireNonNull(snapshot.child("CountData").child("userMail").getValue()).toString();
+                    userMail = v.findViewById(R.id.userMail);
+                    userMail.setText(val);
 
                     /*-----------------*/
-                    if (snapshot.hasChild("ImageData")){
-                        val = Objects.requireNonNull(snapshot.child("ImageData").child("imgPerfil").child("ImageMain").getValue()).toString();
-                        userImageProfile = v.findViewById(R.id.imgPhoto);
-                        Glide.with(v).load(val).into(userImageProfile);
-                    }
+                    val = Objects.requireNonNull(snapshot.child("PetData").child("petName").getValue()).toString();
+                    petName = v.findViewById(R.id.homeNamePet);
+                    petName.setText(val);
+                    petName = v.findViewById(R.id.petNameT);
+                    petName.setText(val);
 
 
-                    if (snapshot.hasChild("PetData")) {
+                    /*-----------------*/
+                    val = Objects.requireNonNull(snapshot.child("PetData").child("petEge").getValue()).toString();
+                    petAge = v.findViewById(R.id.homeEdadPet);
+                    petAge.setText(val);
 
-                        if (snapshot.child("PetData").hasChild("petName")) {
-                            val = Objects.requireNonNull(snapshot.child("PetData").child("petName").getValue()).toString();
-                            petName = v.findViewById(R.id.text_targeta_pet_content_info_1);
-                            petName.setText(val);
-                        }
+                    /*-----------------*/
+                    val = Objects.requireNonNull(snapshot.child("PetData").child("petColor").getValue()).toString();
+                    petColor = v.findViewById(R.id.homeColorPet);
+                    petColor.setText(val);
+
+                    /*-----------------*/
+                    val = Objects.requireNonNull(snapshot.child("PetData").child("petBreed").getValue()).toString();
+                    petBreed = v.findViewById(R.id.homeRazaPet);
+                    petBreed.setText(val);
+
+                    /*-----------------*/
+                    val = Objects.requireNonNull(snapshot.child("PetData").child("petHealth").getValue()).toString();
+                    petHealth = v.findViewById(R.id.homeSaludPet);
+                    petHealth.setText(val);
 
 
-                        /*-----------------*/
-                        if (snapshot.child("PetData").hasChild("petEge")) {
-                            val = Objects.requireNonNull(snapshot.child("PetData").child("petEge").getValue()).toString();
-                            petAge = v.findViewById(R.id.text_targeta_pet_content_info_2);
-                            petAge.setText(val);
-                        }
 
-                        /*-----------------*/
-                        if (snapshot.child("PetData").hasChild("petColor")) {
-                            val = Objects.requireNonNull(snapshot.child("PetData").child("petColor").getValue()).toString();
-                            petColor = v.findViewById(R.id.text_targeta_pet_content_info_3);
-                            petColor.setText(val);
-                        }
+                    /*-----------------*/
+                    val = Objects.requireNonNull(snapshot.child("ImageData").child("imgPerfil").child("ImageMain").getValue()).toString();
+                    userImageProfile = v.findViewById(R.id.imgPhoto);
+                    Glide.with(v).load(val).into(userImageProfile);
 
-                        /*-----------------*/
-                        if (snapshot.child("PetData").hasChild("petBreed")) {
-                            val = Objects.requireNonNull(snapshot.child("PetData").child("petBreed").getValue()).toString();
-                            petBreed = v.findViewById(R.id.text_targeta_pet_content_info_4);
-                            petBreed.setText(val);
-                        }
 
-                        /*-----------------*/
-                        if (snapshot.child("PetData").hasChild("petHealth")) {
-                            val = Objects.requireNonNull(snapshot.child("PetData").child("petHealth").getValue()).toString();
-                            petHealth = v.findViewById(R.id.text_targeta_pet_content_info_5);
-                            petHealth.setText(val);
-                        }
 
-                        /*-----------------*/
-                        if (snapshot.child("PetData").hasChild("imgPetPerfil")){
-                            val = Objects.requireNonNull(snapshot.child("PetData").child("imgPetPerfil").child("ImageMain").getValue()).toString();
-                            petImageProfile = v.findViewById(R.id.imagePet);
-                            Glide.with(v).load(val).into(petImageProfile);
-                        }
+                    /*-----------------*/
+                    val = Objects.requireNonNull(snapshot.child("ImageData").child("imgPetPerfil").child("ImageMain").getValue()).toString();
+                    petImageProfile = v.findViewById(R.id.imagePet);
+                    Glide.with(v).load(val).into(petImageProfile);
 
-                    }
+
 
 
                 }else {

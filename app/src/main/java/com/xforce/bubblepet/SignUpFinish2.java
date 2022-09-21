@@ -113,7 +113,7 @@ public class SignUpFinish2 extends AppCompatActivity {
 
                 if ((contImageUser.getDrawable() == null)){
                     setDefaultDataImageBase();
-                    msgToast("Elija una foto de perfil");
+                    msgToast("Selecciona la imagen de tu mascota");
                 }else {
                     SetDataBase();
                 }
@@ -143,22 +143,22 @@ public class SignUpFinish2 extends AppCompatActivity {
         ResetText(btResetTextBreed,petBreed);/*Reiniciamos el texto*/
         ResetText(btResetTextHealth,petHealth);/*Reiniciamos el texto*/
         changeImageUser.setOnClickListener(v ->{
-            msgToast("Selecciona tu imagen");
 
             openGallery();
-
 
         });/*Elegimos la nueva imagen de usuario*/
     }
 
     @Override public void onBackPressed() {
 
-        /*DeleteUser();*/
+        DeleteUser();
 
     }
     /*-------------------------------------------------------------------------------*/
 
 
+    /*--------------------*/
+    /*Codigo de la seleccion de imagen y envio a la base de datos*/
     private void openGallery(){
         Intent i = new Intent();
         i.setType("image/*");
@@ -197,7 +197,7 @@ public class SignUpFinish2 extends AppCompatActivity {
         Map<String, Object> data = new HashMap<>();
         data.put("ImageMain", link);
         String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
-        userDataBase.child("Users").child(id).child("PetData").child("imgPetPerfil").setValue(data).addOnCompleteListener(task1 -> msgToast("Datos actualizados"));
+        userDataBase.child("Users").child(id).child("ImageData").child("imgPetPerfil").setValue(data).addOnCompleteListener(task1 -> msgToast("Datos actualizados"));
 
     }
 

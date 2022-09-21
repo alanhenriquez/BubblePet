@@ -5,9 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -164,45 +161,26 @@ public class EditProfile extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK && requestCode == SELECT_PICTURE) {
-
-
             imageUri = data.getData();
             contImageUser.setImageURI(imageUri);
-
-            // Code for showing progressDialog while uploading
-            ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("Subiendo...");
-            progressDialog.show();
-            progressDialog.setCancelable(false);
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.setOnCancelListener(new Dialog.OnCancelListener() {
-                @Override public void onCancel(DialogInterface dialog) {
-                    // DO SOME STUFF HERE
-                }
-            });
 
             String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
             StorageReference folder = FirebaseStorage.getInstance().getReference().child("Users").child(id);
             final StorageReference file_name = folder.child(imageUri.getLastPathSegment());
-            file_name.putFile(imageUri).addOnProgressListener(taskSnapshot -> {
-                double progress = (100.0 * taskSnapshot.getBytesTransferred()
-                        / taskSnapshot.getTotalByteCount());
-                progressDialog.setMessage("Exportando al " + (int)progress + "%");
-            }).addOnSuccessListener(taskSnapshot -> file_name.getDownloadUrl().addOnSuccessListener(uri -> {
-                //Enviamos a la base de datos la url de la imagen
-                setDataImageBase(String.valueOf(uri));
-                progressDialog.dismiss();
-                msgToast("Se subio correctamente");
-            })).addOnFailureListener(e -> {
-                // Error, Image not uploaded
-                progressDialog.dismiss();
-                msgToast("Error en la carga " + e.getMessage());
-            });
+            file_name.putFile(imageUri).addOnSuccessListener(taskSnapshot ->
+                    file_name.getDownloadUrl().addOnSuccessListener(uri -> {
+
+                        //Enviamos a la base de datos la url de la imagen
+                        setDataImageBase(String.valueOf(uri));
+                        msgToast("Se subio correctamente");
+
+
+
+                    }));
+
 
         }
     }
-
-
 
     /*Agregamos la Url de la imagen a la base de datos*/
     private void setDataImageBase(String link){
@@ -210,11 +188,10 @@ public class EditProfile extends AppCompatActivity {
         data.put("ImageMain", link);
         String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
         userDataBase.child("Users").child(id).child("ImageData").child("imgPerfil").setValue(data).addOnCompleteListener(task1 -> msgToast("Datos actualizados"));
-        CerrarSesion();
+
     }
     /*Termina codigo de la seleccion de imagen y envio a la base de datos*/
     /*--------------------*/
-
 
 
 

@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -20,12 +21,29 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/linearLayout7"
+                android:id="@+id/linearLayout5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingTop="50dp"
-                tools:ignore="UselessParent">
+                android:paddingVertical="30dp">
+
+                <TextView
+                    android:id="@+id/titleSignUpFinish"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@string/fontTopicSignUpFinish"
+                    android:text="@string/textoTittleSignUpFinish"
+                    android:textAlignment="@integer/textAlignmentTitleSignUpFinish"
+                    android:textColor="@color/textColorTitleSignUpFinish"
+                    android:textSize="@dimen/sizeTextTitleSignUpFinish" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayout7"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -42,7 +60,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
-<!--
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
@@ -116,7 +134,7 @@
                                 </androidx.cardview.widget.CardView>
                             </androidx.constraintlayout.widget.ConstraintLayout>
 
-                        </LinearLayout>-->
+                        </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -255,7 +273,7 @@
                             android:background="@drawable/backgroundBotonSignUpFinish"
                             android:fontFamily="@string/fontBtFormularioLogin"
                             android:paddingVertical="@dimen/paddingVBtFormularioLogin"
-                            android:text="Crear"
+                            android:text="@string/textoBotonSignUp"
                             android:textAlignment="center"
                             android:textColor="@color/colorBtFormularioLogin"
                             android:textSize="@dimen/sizeTxBtFormularioLogin"
