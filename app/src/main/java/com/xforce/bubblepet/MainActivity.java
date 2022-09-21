@@ -1,5 +1,4 @@
 package com.xforce.bubblepet;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 

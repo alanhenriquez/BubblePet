@@ -2,17 +2,14 @@ package com.xforce.bubblepet;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -20,7 +17,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.Objects;
 
 /**
@@ -28,6 +24,8 @@ import java.util.Objects;
  * Use the {@link FragmentUserHome#newInstance} factory method to
  * create an instance of this fragment.
  */
+
+
 public class FragmentUserHome extends Fragment {
 
     /*Importantes de usar aqui:
@@ -36,7 +34,6 @@ public class FragmentUserHome extends Fragment {
      * - Iniciar variables en el metodo onCreat
      * - Acceder a los elementos por sus id mediante el metodo onCreateView
      * - Funcion getData que obtiene los datos desde Firebase*/
-
     /*-------------------------------------------------------------------------------*/
     /* - Variables*/
     /*Variables para texto, campos de texto y contenedores*/
@@ -47,30 +44,22 @@ public class FragmentUserHome extends Fragment {
     private TextView petColor;
     private TextView petBreed;
     private TextView petHealth;
-
     private ImageView userImageProfile;
     private ImageView petImageProfile;
-
     /*Acceso a Firebase y AwesomeValidation*/
     FirebaseAuth userAuth;
     DatabaseReference userDataBase;
-
-
-
     /*-------------------------------------------------------------------------------*/
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     public FragmentUserHome() {
         // Required empty public constructor
     }
-
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -88,7 +77,6 @@ public class FragmentUserHome extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,13 +84,9 @@ public class FragmentUserHome extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
-
         userAuth = FirebaseAuth.getInstance();
         userDataBase = FirebaseDatabase.getInstance().getReference();
-
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -116,11 +100,6 @@ public class FragmentUserHome extends Fragment {
         return view;
     }
     /*-------------------------------------------------------------------------------*/
-
-
-
-
-
     /*Funcion getData que obtiene los datos desde Firebase base de datos*/
     private void getData (View v){
         String id = Objects.requireNonNull(userAuth.getCurrentUser()).getUid();
@@ -188,25 +167,16 @@ public class FragmentUserHome extends Fragment {
                 }else {
                     msgToast("Error",v);
                 }
-
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 msgToast("Error de carga",v);
             }
         });
     }
-
-
-
     /*Importante para importar la interfaz del Fragment. No eliminar*/
     public interface OnFragmentInteractionListener {
-
     }
-
-
-
     /*Variable para generar el mensaje Toast*/
     private void msgToast(String message, View v) {
         Toast.makeText(v.getContext(),message, Toast.LENGTH_LONG).show();

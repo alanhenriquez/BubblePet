@@ -1,5 +1,4 @@
 package com.xforce.bubblepet;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,7 +12,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -30,7 +28,6 @@ import com.google.firebase.storage.StorageReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
 public class EditPetProfile extends AppCompatActivity {
     /*-------------------------------------------------------------------------------*/
     /*Variables para texto, campos de texto y contenedores*/
@@ -44,39 +41,23 @@ public class EditPetProfile extends AppCompatActivity {
     private String petColorString = " ";
     private String petBreedString = " ";
     private String petHealthString = " ";
-
     //ImageView para la imagen de usuario
     Uri imageUri;
     View changeImageUser;//Boton para selecionar imagen
     ImageView contImageUser;//Contenedor con la imagen del usuario
     int SELECT_PICTURE = 200;// constant to compare the activity result code
-
     /*Acceso a Firebase*/
     FirebaseAuth userAuth;
     DatabaseReference userDataBase;
-
-
-
-
-
     /*-------------------------------------------------------------------------------*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_pet_profile);
-
-
-
-
-
         /* Acceso a Instancias FireBase
          * Estos accesos los encontraras en el build.gradle tanto de proyecto como app*/
         userAuth = FirebaseAuth.getInstance();
         userDataBase = FirebaseDatabase.getInstance().getReference();
-
-
-
-
 
         /*Simples variables antes definidas accediendo a los id*/
         petName = findViewById(R.id.petName);
@@ -92,14 +73,9 @@ public class EditPetProfile extends AppCompatActivity {
         TextView saveDatosButton = findViewById(R.id.btSignUpFinish2);
         changeImageUser = findViewById(R.id.selectImageEditProfile);
         contImageUser = findViewById(R.id.imgPhotoUserEditProfile);
-
-
-
-
         /*Botones y acciones*/
         getData();/*Carga previa de los datos*/
         saveDatosButton.setOnClickListener(v ->{
-
             petNameString = petName.getText().toString();
             petEgeString = petAge.getText().toString();
             petColorString = petColor.getText().toString();
@@ -124,9 +100,7 @@ public class EditPetProfile extends AppCompatActivity {
 
         });/*Elegimos la nueva imagen de usuario*/
 
-
     }
-
     @Override public void onBackPressed() {
         super.onBackPressed();
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -245,9 +219,7 @@ public class EditPetProfile extends AppCompatActivity {
                 }else {
                     msgToast("Error");
                 }
-
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 msgToast("Error de carga");
@@ -291,7 +263,5 @@ public class EditPetProfile extends AppCompatActivity {
     private void msgToast(String message) {
         Toast.makeText(getApplicationContext(),message, Toast.LENGTH_LONG).show();
     }
-
-
     /*-------------------------------------------------------------------------------*/
 }
